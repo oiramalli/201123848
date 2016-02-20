@@ -2,13 +2,13 @@ typedef struct PARTITIONS {
 	char part_status;
 	char part_type;
 	char part_fit;
-	char part_start;
+	int part_start;
 	int part_size;
 	char part_name [16];
 } partition;
 typedef struct MBR {
 	int mbr_tamaño;
-	time_t mbr_fecha_creacion;
+	int mbr_fecha_creacion;
 	int mbr_disk_signature;
 	partition mbr_partition_1;
 	partition mbr_partition_2;

@@ -4,7 +4,6 @@
 #include <time.h>
 #include "Functions.h"
 #include "MakeDisk.c"
-
 /* Maximum comando size + 1. */
 #define MAX_COMMAND_SZ 256
 
