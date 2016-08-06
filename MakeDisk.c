@@ -3,9 +3,17 @@
 int MakeDisk(char * parametros[],size_t n0){
     printf("\nIniciando creación del disco...\n");
 
-    char unit = 'm';
+    if ( n0 > 4 ){
+		printf("ERROR 0x01 0x0F 0x0F.\nError en la creación del disco, demasiados parametros (%lu).\n",n0);
+		return 0;
+	}
+
+    char unit = 'M';
     char * path = "";
     int size = 0;
+
+    bool flagSize=0;
+	bool flagPath=0;
 
     for (int i = 0; i < n0; ++i)
     {
@@ -32,61 +40,92 @@ int MakeDisk(char * parametros[],size_t n0){
 
 	    if ((strcasecmp (argumento[0],"size ") == 0) || (strcasecmp (argumento[0],"size") == 0) ){
 			size= atoi(argumento[1]);
+			if (size < 1)
+			{
+				printf("ERROR 0x01 0x0F 0x02.\nError en la creación del disco, El tamaño debe ser positivo y mayor que cero (%d).\n",size);
+    			return 0;
+			}
+			flagSize=1;
 			// printf("Tamaño del disco: %d \n",size);
 	    }
 
 	    if ((strcasecmp (argumento[0],"path ") == 0) || (strcasecmp (argumento[0],"path") == 0) ){
 			path = argumento[1];
 			removeChar(path,'"');
+			flagPath=1;
 			// printf("Ubicación del disco: %s \n",path);
 	    }
 		// printf("Fin del argumento\n\n");
     }
+    if ( !(flagPath && flagSize) ) {
+		printf("ERROR 0x01 0x0%d 0x0%d.\nError en la creación del disco, al paracer falta un parametro obligatorio\n\n",flagPath,flagSize);
+    	return 0;
+    }
+
 	printf("Creando el disco en: '%s' con una capacidad de %d %cB  \n",path,size,unit);
 	
 	int realsize = size;
 
 	switch(unit){
 		case 'k':
+			unit='K';
 		case 'K':
 			realsize = size * 1024;
 		break;
 		case 'm':
+			unit='M';
 		case 'M':
 			realsize = size * 1024 * 1024;
 		break;
-
+		default:
+			printf("ERROR 0x01 0x0F 0x01.\nError en la creación del disco, No se reconoce la unidad (%c).\n",unit);
+			return 0;
 	}
 	mbr masterboot;
 	masterboot.mbr_tamaño = realsize;
 	masterboot.mbr_fecha_creacion=(int)time(NULL);
-
 	masterboot.mbr_disk_signature = rand();
+	masterboot.mbr_partition_1.part_status = 'N';
+	masterboot.mbr_partition_2.part_status = 'N';
+	masterboot.mbr_partition_3.part_status = 'N';
+	masterboot.mbr_partition_4.part_status = 'N';
+
 	char garbage[realsize];
 	FILE *fp;
+
+	struct stat st = {0};
+	printf("Verificando si existe el directorio...\n");
+	if (stat(path, &st) == -1) {
+		printf("Creando el directorio...\n");
+		//if( mkdir(path, 0700) != 0 ){
+			//printf("ERROR 0x01 0x0F 0x04.\nError desconocido en la creación del directorio.\n");
+			//return 0;
+		//}
+		//sprintf("Path creado\n");
+	}
 	fp = fopen(path, "w+b");
-	char part_status ='1';
-	char part_type ='p';
-	char part_fit ='c';
-	int part_start =162;
-	int part_size = 10;
-	char part_name [16] = "Mario";
-	
-	fwrite(&masterboot, 1 , sizeof(masterboot), fp);
-	
+	// char part_status ='1';
+	// char part_type ='p';
+	// char part_fit ='c';
+	// int part_start =0;
+	// int part_size = 0;
+	// char part_name [16] = "MarioA.";
 	for (int i = 0; i < sizeof(garbage); ++i)
 	{
-		garbage[i]='\0';
+		fputc('\0',fp);
 	}
-	fwrite(garbage, 1 , sizeof(garbage) - sizeof(masterboot), fp);
+	
+	rewind(fp);
+	fwrite(&masterboot, sizeof(mbr), 1,fp);
+	//fwrite (buffer , sizeof(char), sizeof(buffer), pFile);
+
+	// fprintf(fp,"%d",masterboot.mbr_tamaño);
+	// fprintf(fp,"%d",masterboot.mbr_fecha_creacion);
+	// fprintf(fp,"%d",masterboot.mbr_disk_signature);
+	
 	fclose(fp);
 
-	PartitionData(1, part_status, part_type, part_fit, part_start, part_size, part_name, path);
-	PartitionData(2, part_status, part_type, part_fit, part_start, part_size, part_name, path);
-	PartitionData(3, part_status, part_type, part_fit, part_start, part_size, part_name, path);
-	PartitionData(4, part_status, part_type, part_fit, part_start, part_size, part_name, path);
-
-	// printf("MBR Size: '%lu'\n", sizeof(masterboot)); //120
+	printf("MBR Size: '%lu'\n", sizeof(masterboot)); //120
 	printf("Size: '%d bytes'\n", masterboot.mbr_tamaño); //
 	// printf("Size of Size: '%lu'\n", sizeof(masterboot.mbr_tamaño)); //
 	printf("Time: '%d' (unix timestamp)\n", masterboot.mbr_fecha_creacion); //
@@ -95,17 +134,20 @@ int MakeDisk(char * parametros[],size_t n0){
 	printf("Real size: '%d bytes'\n", realsize); //
 
 
+
     return 1;
 }
 /*
 
-Mkdisk -Size=3000 -unit=K -path=Disco1.dsk
+Mkdisk –Size=3000 –unit=K –path=Disco1.dsk
 
-Mkdisk -path=/home/user/Disco2.dsk -Unit=K -size=3000
+Mkdisk –Size=3000 –unit=K –path=/Users/marioalvarado/Documents/USAC/MIA/Progra/ejemplo03.02.16/Prueba/Disco1.dsk
 
-mkdisk -size=5 -unit=M -path="/home/mis discos/Disco3.dsk"
+Mkdisk –path=/home/user/Disco2.dsk –Unit=K –size=3000
 
-Mkdisk -size=10 -path="/home/mis discos/Disco4.dsk"
+mkdisk –size=5 –unit=M –path="/home/mis discos/Disco3.dsk"
+
+Mkdisk –size=10 –path="/home/mis discos/Disco4.dsk"
 
 */
 /* MBR */ // 120?

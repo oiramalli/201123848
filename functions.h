@@ -1,3 +1,11 @@
+typedef struct EBR {
+	char part_status;
+	char part_fit;
+	int part_start;
+	int part_size;
+	int part_next;
+	char part_name [16];
+} ebr;
 typedef struct PARTITIONS {
 	char part_status;
 	char part_type;
@@ -25,3 +33,7 @@ void removeChar(char *str, char garbage) {
     }
     *dst = '\0';
 }
+
+#define bool int
+#define true 1
+#define false 0

@@ -1,19 +1,21 @@
 int PartitionData(int partition_number, char part_status, char part_type, char part_fit, int part_start, int part_size, char part_name [16], char* path){
 	FILE *fp;
-	fp = fopen(path, "rw+b");
+	fp = fopen(path, "r+b");
+	rewind(fp);
+
 	int part_initialbyte=0;
 	switch(partition_number){
 		case 1:
-			part_initialbyte = 13;
+			part_initialbyte = 13*4;
 		break;
 		case 2:
-			part_initialbyte = 37;
+			part_initialbyte = 37*4;
 		break;
 		case 3:
-			part_initialbyte = 61;
+			part_initialbyte = 61*4;
 		break;
 		case 4:
-			part_initialbyte = 85;
+			part_initialbyte = 85*4;
 		break;
 	}
 	int part_status_byte = part_initialbyte;
@@ -24,37 +26,44 @@ int PartitionData(int partition_number, char part_status, char part_type, char p
 	int part_name_byte = part_initialbyte + 8;
 
 	fseek ( fp , part_status_byte , SEEK_SET);
-	printf("Posicionandonos en %d...\n", part_status_byte); //
+	printf("Posicionandonos en %d...  %c \n", part_status_byte,part_status); //
 	fwrite( &part_status, sizeof(part_status),1,fp);
-	rewind ( fp );
+	// fputc( part_status,fp );
+	// rewind ( fp );
 
 	fseek ( fp , part_type_byte , SEEK_SET);
 	printf("Posicionandonos en %d...\n", part_type_byte); //
 	fwrite( &part_type, sizeof(part_type),1,fp);
-	rewind ( fp );
+	// fputc( part_type,fp );
+	// rewind ( fp );
 
 	fseek ( fp , part_fit_byte , SEEK_SET);
 	printf("Posicionandonos en %d...\n", part_fit_byte); //
+	// fputc( part_fit,fp );
 	fwrite( &part_fit, sizeof(part_fit),1,fp);
-	rewind ( fp );
+	// rewind ( fp );
 
 	fseek ( fp , part_start_byte , SEEK_SET);
 	printf("Posicionandonos en %d...\n", part_start_byte); //
 	fwrite( &part_start, sizeof(part_start),1,fp);
-	rewind ( fp );
+	// fprintf(fp,"%d", part_start);
+	// rewind ( fp );
 
 	fseek ( fp , part_size_byte , SEEK_SET);
 	printf("Posicionandonos en %d...\n", part_size_byte); //
 	fwrite( &part_size, sizeof(part_size),1,fp);
-	rewind ( fp );
+	// fprintf(fp,"%d", part_size);
+	// rewind ( fp );
 
 	fseek ( fp , part_name_byte , SEEK_SET);
 	printf("Posicionandonos en %d...\n", part_name_byte); //
+	fputs( part_name,fp );
+	// fwrite( &part_name, 16,1,fp);
+	// fprintf(fp,"%s", part_name);
 	//fwrite( &part_name, 16,1,fp);
-	fputs("here", fp );
-	rewind ( fp );
+	// rewind ( fp );
 	fclose(fp);
-	
+
 	return 1;
 }
 
