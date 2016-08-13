@@ -11,6 +11,7 @@
 #include "RemoveDisk.c"
 #include "FormatDisk.c"
 
+//        Mkdisk –Size::3000   +unit::K   –path::   "/home/user/"        
 /* Maximum comando size + 1. */
 #define MAX_COMMAND_SZ 256
 
@@ -36,8 +37,10 @@ int main(int argC, char *argV[]) {
         }
 
         char lastChar=comando[strlen (comando)-1];
+        
+        remove_extra_spaces(comando);
 
-        // printf("Last: '%c'",lastChar);
+        // printf("Last: '%c'\n",lastChar);
 
         while(lastChar=='\\'){
             comando[strlen (comando) - 1] = '\0';
@@ -51,9 +54,9 @@ int main(int argC, char *argV[]) {
         }
 
         /* EDIT */
-        char * parametros[50];
+        char * parametros[10];
         size_t n = 0;
-        for (char * p = strtok(comando, "–"); p; p = strtok(NULL, "–"))
+        for (char * p = strtok(comando, " "); p; p = strtok(NULL, " "))
         {
             if (n >= 50)
             {
@@ -63,32 +66,35 @@ int main(int argC, char *argV[]) {
             parametros[n++] = p;
         }
 
-        // for (size_t i = 0; i != n; ++i)
-        // {
-        //      printf("Token %zu is '%s'.\n", i, parametros[i]);
-        // }
+        for (size_t i = 0; i != n; ++i)
+        {
+             printf("Token %zu is '%s'.\n", i, parametros[i]);
+        }
         /* /EDIT */
 
-        // printf("El comando fué: '%s' \n", parametros[0]);
+        printf("El comando fué: '%s' \n", parametros[0]);
 
-        if ((strcasecmp (parametros[0],"mkdisk ") == 0) || (strcasecmp (parametros[0],"mkdisk") == 0) )
+        if ( strcasecmp (parametros[0], "mkdisk") == 0 )
         {
             MakeDisk(parametros,n);
-        }else if ((strcasecmp (parametros[0],"rmdisk ") == 0) || (strcasecmp (parametros[0],"rmdisk") == 0) )
-        {
-            RemoveDisk(parametros,n);
-        }else if ((strcasecmp (parametros[0],"fdisk ") == 0) || (strcasecmp (parametros[0],"fdisk") == 0) )
-        {
-            FormatDisk(parametros,n);
-        }else if ((strcasecmp (parametros[0],"exit ") == 0) || (strcasecmp (parametros[0],"exit") == 0) )
-        {
-            printf("Espero haber sido util ;)...\nHasta la próxima... \n");
-        }else
-        {
-            printf("ERROR 0x00 0x00 0x00\nNo se reconoce el comando '%s' \n", parametros[0]);
         }
+        // else if ((strcasecmp (parametros[0],"rmdisk ") == 0) || (strcasecmp (parametros[0],"rmdisk") == 0) )
+        // {
+        //     RemoveDisk(parametros,n);
+        // }else if ((strcasecmp (parametros[0],"fdisk ") == 0) || (strcasecmp (parametros[0],"fdisk") == 0) )
+        // {
+        //     FormatDisk(parametros,n);
+        // }else if ((strcasecmp (parametros[0],"exit ") == 0) || (strcasecmp (parametros[0],"exit") == 0) )
+        // {
+        //     printf("Espero haber sido util ;)...\nHasta la próxima... \n");
+        // }else
+        // {
+        //     printf("ERROR 0x00 0x00 0x00\nNo se reconoce el comando '%s' \n", parametros[0]);
+        // }
 
         /* Free memory and exit. */
+        free (comando);
+        // comando = malloc (MAX_COMMAND_SZ);
     }while(strcasecmp (comando,"exit") != 0 );
     free (comando);
     return 0;
@@ -97,6 +103,8 @@ int main(int argC, char *argV[]) {
 Test:
 
 Mkdisk –Size=3000 –unit=K –path=Disco1.dsk
+
+   Mkdisk     –Size=3000     –unit=K    –path="Disco1.dsk"    
 
 fdisk –Size=300 –path=Disco1.dsk –name=Particion1
 
