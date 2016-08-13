@@ -78,10 +78,11 @@ int main(int argC, char *argV[]) {
         {
             MakeDisk(parametros,n);
         }
-        // else if ((strcasecmp (parametros[0],"rmdisk ") == 0) || (strcasecmp (parametros[0],"rmdisk") == 0) )
-        // {
-        //     RemoveDisk(parametros,n);
-        // }else if ((strcasecmp (parametros[0],"fdisk ") == 0) || (strcasecmp (parametros[0],"fdisk") == 0) )
+        else if ((strcasecmp (parametros[0],"rmdisk ") == 0) || (strcasecmp (parametros[0],"rmdisk") == 0) )
+        {
+            RemoveDisk(parametros,n);
+        }
+        // else if ((strcasecmp (parametros[0],"fdisk ") == 0) || (strcasecmp (parametros[0],"fdisk") == 0) )
         // {
         //     FormatDisk(parametros,n);
         // }else if ((strcasecmp (parametros[0],"exit ") == 0) || (strcasecmp (parametros[0],"exit") == 0) )

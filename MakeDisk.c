@@ -16,6 +16,7 @@ int MakeDisk(char * parametros[],size_t n0){
 
   bool flagSize=0;
   bool flagPath=0;
+  bool flagName=0;
 
   for (int i = 0; i < n0; ++i)
   {
@@ -54,14 +55,21 @@ int MakeDisk(char * parametros[],size_t n0){
     if ((strcasecmp (argumento[0],"-path ") == 0) || (strcasecmp (argumento[0],"-path") == 0) ){
       char lastChar = argumento[1][strlen (argumento[1])-1];
       path = strdup(argumento[1]);
+      int j = i+1;
       while(lastChar!='"'){
-        printf("\n>'%s' - '%s'",path,parametros[i+1]);
-        char * tmp = strdup(parametros[i+1]);
+        // printf(">'%s' - '%s'\n",path,parametros[i+1]);
+        char * tmp = strdup(parametros[j]);
+        j++;
         strcat(path," ");
-        printf("\n>'%s'",path);
+        // printf(">'%s'\n",path);
         strcat(path,tmp);
-        printf("\n>'%s'",path);
+        // printf(">'%s'\n",path);
         lastChar = path[strlen(path)-1];
+      }
+      lastChar = path[strlen(path)-1];
+      if (lastChar=='/')
+      {
+        path[strlen (path) - 1] = '\0';
       }
       removeChar(path,'"');
       flagPath=1;
@@ -69,14 +77,24 @@ int MakeDisk(char * parametros[],size_t n0){
     }
 
     if ((strcasecmp (argumento[0],"-name ") == 0) || (strcasecmp (argumento[0],"-name") == 0) ){
-      name = argumento[1];
+      char lastChar = argumento[1][strlen (argumento[1])-1];
+      name = strdup(argumento[1]);
+      while(lastChar!='"'){
+        // printf(">'%s' - '%s'\n",name,parametros[i+1]);
+        char * tmp = strdup(parametros[i+1]);
+        strcat(name," ");
+        // printf(">'%s'\n",name);
+        strcat(name,tmp);
+        // printf(">'%s'\n",name);
+        lastChar = name[strlen(name)-1];
+      }
       removeChar(name,'"');
-      flagPath=1;
+      flagName=1;
       // printf("Ubicación del disco: %s \n",path);
     }
     // printf("Fin del argumento\n\n");
   }
-  if ( !(flagPath && flagSize) ) {
+  if ( !(flagPath && flagSize && flagName) ) {
     printf("ERROR 0x01 0x0%d 0x0%d.\nError en la creación del disco, al paracer falta un parametro obligatorio\n\n",flagPath,flagSize);
     return 0;
   }
@@ -113,7 +131,7 @@ int MakeDisk(char * parametros[],size_t n0){
   struct stat st = {0};
   printf("Verificando si existe el directorio...\n");
   if (stat(path, &st) == -1) {
-    printf("Creando el directorio...\n");
+    printf("Creando el directorio '%s'...\n",path);
     if( mkdir(path, 0700) != 0 ){
       printf("ERROR 0x01 0x0F 0x04.\nError desconocido en la creación del directorio.\n");
       return 0;
